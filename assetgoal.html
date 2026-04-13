@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ✅ SEO 메타태그 -->
+  <title>목표자산 계산기 — 목표 금액까지 얼마나 필요할까? | WhatAGoodLife</title>
+  <meta name="description" content="목표자산 계산기: 기초 원금과 목표 자산을 입력하면 필요한 수익률, 목표 기간, 월 납입금을 역산해드립니다. 재테크 목표 설정에 활용하세요.">
+  <meta name="keywords" content="목표자산 계산기, 목표 수익률 계산, 월 납입금 계산, 투자 기간 계산, 재테크 계산기, 자산 목표">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://whatagoodlife.net/assetgoal.html">
+
+  <!-- ✅ Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="목표자산 계산기 — 목표 금액까지 얼마나 필요할까?">
+  <meta property="og:description" content="기초 원금과 목표 자산을 입력하면 필요한 수익률, 기간, 월 납입금을 역산해드립니다.">
+  <meta property="og:url" content="https://whatagoodlife.net/assetgoal.html">
+  <meta property="og:site_name" content="WhatAGoodLife">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- ✅ 구글 애드센스 — 승인 후 아래 주석 해제 -->
+  <!--
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+       crossorigin="anonymous"></script>
+  -->
+
+  <style>
+    :root {
+      --bg: #f7f6f2;
+      --surface: #ffffff;
+      --border: #e4e2db;
+      --text: #1c1c1a;
+      --muted: #7a7870;
+      --accent: #2563eb;
+      --accent-light: #eff4ff;
+      --green: #16a34a;
+      --green-light: #f0fdf4;
+      --amber: #d97706;
+      --amber-light: #fffbeb;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-size: 15px; font-weight: 600; color: var(--text); text-decoration: none; letter-spacing: -0.3px; }
+    .logo span { color: var(--accent); }
+    .back-link { font-size: 13px; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .back-link:hover { color: var(--text); }
+
+    main { max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+    .hero { text-align: center; margin-bottom: 2.5rem; }
+    .hero-badge { display: inline-block; background: var(--purple-light); color: var(--purple); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-bottom: 1rem; }
+    h1 { font-size: clamp(22px, 5vw, 32px); font-weight: 700; letter-spacing: -0.5px; line-height: 1.3; margin-bottom: 0.75rem; }
+    h1 em { color: var(--purple); font-style: normal; }
+    .hero-sub { font-size: 15px; color: var(--muted); max-width: 500px; margin: 0 auto; }
+
+    .ad-slot { background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 1rem; text-align: center; color: var(--muted); font-size: 12px; margin-bottom: 2rem; min-height: 90px; display: flex; align-items: center; justify-content: center; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; margin-bottom: 1.25rem; }
+    .card-title { font-size: 15px; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+    .card-title .icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--purple-light); }
+
+    .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; }
+    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.03em; text-transform: uppercase; }
+    .input-wrap { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; transition: border-color .15s; }
+    .input-wrap:focus-within { border-color: var(--purple); }
+    .input-wrap input { border: none; background: transparent; padding: 10px 12px; font-size: 16px; font-weight: 500; color: var(--text); width: 100%; outline: none; }
+    .input-wrap .unit { padding: 0 12px 0 4px; font-size: 13px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+
+    /* 탭 */
+    .tab-row { display: flex; gap: 0; margin-bottom: 1.5rem; background: var(--bg); border-radius: var(--radius-sm); padding: 4px; }
+    .tab-btn { flex: 1; padding: 8px 4px; border: none; background: transparent; font-size: 13px; font-weight: 500; color: var(--muted); border-radius: 6px; cursor: pointer; transition: all .12s; text-align: center; }
+    .tab-btn.active { background: var(--surface); color: var(--purple); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+    /* 결과 카드 */
+    .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1rem; }
+    .result-card { background: var(--bg); border-radius: var(--radius-sm); padding: 1rem; }
+    .result-card .r-label { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px; }
+    .result-card .r-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .result-card.purple .r-value { color: var(--purple); }
+    .result-card.green .r-value { color: var(--green); }
+    .result-card.accent .r-value { color: var(--accent); }
+
+    /* 진행 바 */
+    .progress-wrap { margin: 1rem 0; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .progress-bg { height: 10px; background: var(--bg); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #2563eb); border-radius: 20px; transition: width .5s ease; }
+
+    /* 슬라이더 */
+    .slider-row { margin-top: 8px; }
+    input[type="range"] { width: 100%; height: 4px; accent-color: var(--purple); cursor: pointer; }
+
+    /* 안내 박스 */
+    .info-box { background: var(--purple-light); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: #5b21b6; margin-top: 8px; line-height: 1.6; }
+    .warn-box { background: var(--amber-light); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: #92400e; margin-top: 8px; line-height: 1.6; }
+
+    /* 역산 섹션 */
+    .scenario-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 1rem; }
+    .condition-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+    .condition-row label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .condition-row .inline-input { display: flex; align-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; }
+    .condition-row .inline-input input { border: none; background: transparent; font-size: 14px; font-weight: 500; width: 70px; outline: none; color: var(--text); }
+    .condition-row .inline-input span { font-size: 13px; color: var(--muted); }
+
+    /* 역산 결과 박스 */
+    .answer-box { background: #1e1b4b; border-radius: var(--radius); padding: 1.5rem; margin-top: 0.5rem; }
+    /* 핵심 결과: 상단 크게 */
+    .answer-primary { text-align: center; padding-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1.25rem; }
+    .answer-primary .ap-badge { display: inline-block; background: rgba(251,191,36,0.2); color: #fcd34d; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+    .answer-primary .ap-label { font-size: 12px; font-weight: 600; color: #a5b4fc; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px; }
+    .answer-primary .ap-value { font-size: 36px; font-weight: 900; color: #fbbf24; letter-spacing: -1px; line-height: 1; }
+    .answer-primary .ap-sub { font-size: 13px; color: #818cf8; margin-top: 8px; }
+    /* 보조 결과: 하단 작게 나란히 */
+    .answer-secondary { display: flex; gap: 0; justify-content: center; }
+    .answer-sec-item { flex: 1; text-align: center; padding: 0 1rem; border-right: 1px solid rgba(255,255,255,0.1); }
+    .answer-sec-item:last-child { border-right: none; }
+    .answer-sec-item .as-label { font-size: 11px; font-weight: 600; color: #a5b4fc; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+    .answer-sec-item .as-value { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+    .answer-sec-item .as-sub { font-size: 12px; color: #818cf8; margin-top: 2px; }
+
+    /* 복리 계산기 배너 */
+    .back-banner { background: var(--accent-light); border: 1px solid #bfdbfe; border-radius: var(--radius); padding: 1.25rem 1.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; text-decoration: none; margin-bottom: 1.25rem; transition: opacity .15s; }
+    .back-banner:hover { opacity: .85; }
+
+    footer { border-top: 1px solid var(--border); padding: 2rem 1.5rem; text-align: center; font-size: 13px; color: var(--muted); }
+    footer a { color: var(--muted); text-decoration: none; margin: 0 0.5rem; }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .card { padding: 1.25rem; }
+      .tab-btn { font-size: 11px; padding: 7px 2px; }
+      .answer-item .a-value { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="compound.html">What<span>A</span>GoodLife</a>
+  <a class="back-link" href="compound.html">← 복리 계산기로 돌아가기</a>
+</header>
+
+<main>
+
+  <div class="hero">
+    <div class="hero-badge">🎯 목표자산 계산기</div>
+    <h1>목표 자산까지<br><em>얼마나 걸릴까?</em></h1>
+    <p class="hero-sub">목표 자산까지 얼마나 걸릴지, 무엇이 필요한지 역으로 계산합니다.</p>
+  </div>
+
+  <!-- ✅ 애드센스 상단 슬롯 -->
+  <!--
+  <div style="margin-bottom:2rem;text-align:center;">
+    <ins class="adsbygoogle" style="display:block"
+      data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      data-ad-slot="XXXXXXXXXX"
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+  </div>
+  -->
+  <div class="ad-slot">광고 영역 (애드센스 승인 후 코드 삽입)</div>
+
+  <!-- ── 기본 입력 ── -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon">✏️</div>
+      기본 정보 입력
+    </div>
+    <div class="input-grid">
+      <div class="field">
+        <label>기초 원금</label>
+        <div class="input-wrap">
+          <input type="number" id="principal" value="10000000" min="0" step="1000000" oninput="calcAll()">
+          <span class="unit">원</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>목표 자산</label>
+        <div class="input-wrap">
+          <input type="number" id="target" value="100000000" min="0" step="1000000" oninput="calcAll()">
+          <span class="unit">원</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 목표 달성 진행률 -->
+    <div class="progress-wrap" style="margin-top:1.25rem;">
+      <div class="progress-label">
+        <span>현재 원금</span>
+        <span id="prog-pct">—</span>
+      </div>
+      <div class="progress-bg">
+        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-label" style="margin-top:4px;">
+        <span id="prog-principal">—</span>
+        <span id="prog-target">목표 —</span>
+      </div>
+    </div>
+
+    <div class="info-box" id="need-box">목표 자산까지 — 원이 더 필요합니다.</div>
+  </div>
+
+  <!-- ── 탭 역산 섹션 ── -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon">🔢</div>
+      무엇을 역산할까요?
+    </div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab(0,this)">목표 기간 계산</button>
+      <button class="tab-btn" onclick="switchTab(1,this)">목표 수익률 계산</button>
+      <button class="tab-btn" onclick="switchTab(2,this)">월 납입금 계산</button>
+    </div>
+
+    <!-- 탭 2: 월 납입금 계산 (수익률 + 기간 입력 → 월납입금 출력) -->
+    <div id="tab2" style="display:none;">
+      <p class="scenario-title">목표 수익률과 목표 기간을 정했을 때</p>
+      <div class="input-grid" style="margin-bottom:1rem;">
+        <div class="field">
+          <label>연 수익률</label>
+          <div class="input-wrap">
+            <input type="number" id="t0-rate" value="7" min="0" max="50" step="0.1" oninput="calcTab0()">
+            <span class="unit">%</span>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="t0-rate-s" min="0" max="30" step="0.1" value="7" oninput="document.getElementById('t0-rate').value=parseFloat(this.value).toFixed(1);calcTab0()">
+          </div>
+        </div>
+        <div class="field">
+          <label>투자 기간</label>
+          <div class="input-wrap">
+            <input type="number" id="t0-years" value="10" min="1" max="50" step="1" oninput="calcTab0()">
+            <span class="unit">년</span>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="t0-years-s" min="1" max="50" step="1" value="10" oninput="document.getElementById('t0-years').value=this.value;calcTab0()">
+          </div>
+        </div>
+      </div>
+      <div class="answer-box" id="ans0">
+        <div class="answer-primary">
+          <div class="ap-badge">계산 결과</div>
+          <div class="ap-label">필요한 월 납입금</div>
+          <div class="ap-value" id="a0-monthly">—</div>
+          <div class="ap-sub" id="a0-sub">계산 중</div>
+        </div>
+        <div class="answer-secondary">
+          <div class="answer-sec-item">
+            <div class="as-label">총 납입 원금</div>
+            <div class="as-value" id="a0-total-p">—</div>
+            <div class="as-sub">원금 합계</div>
+          </div>
+          <div class="answer-sec-item">
+            <div class="as-label">총 이자 수익</div>
+            <div class="as-value" id="a0-interest">—</div>
+            <div class="as-sub">복리 효과</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 탭 0: 목표 기간 계산 (수익률 + 월납입금 입력 → 기간 출력) -->
+    <div id="tab0">
+      <p class="scenario-title">목표 수익률과 월 납입금을 정했을 때</p>
+      <div class="input-grid" style="margin-bottom:1rem;">
+        <div class="field">
+          <label>연 수익률</label>
+          <div class="input-wrap">
+            <input type="number" id="t1-rate" value="7" min="0" max="50" step="0.1" oninput="calcTab1()">
+            <span class="unit">%</span>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="t1-rate-s" min="0" max="30" step="0.1" value="7" oninput="document.getElementById('t1-rate').value=parseFloat(this.value).toFixed(1);calcTab1()">
+          </div>
+        </div>
+        <div class="field">
+          <label>월 납입금</label>
+          <div class="input-wrap">
+            <input type="number" id="t1-monthly" value="300000" min="0" step="10000" oninput="calcTab1()">
+            <span class="unit">원</span>
+          </div>
+        </div>
+      </div>
+      <div class="answer-box" id="ans1">
+        <div class="answer-primary">
+          <div class="ap-badge">계산 결과</div>
+          <div class="ap-label">목표 달성 기간</div>
+          <div class="ap-value" id="a1-years">—</div>
+          <div class="ap-sub" id="a1-sub">계산 중</div>
+        </div>
+        <div class="answer-secondary">
+          <div class="answer-sec-item">
+            <div class="as-label">총 납입 횟수</div>
+            <div class="as-value" id="a1-months">—</div>
+            <div class="as-sub">개월</div>
+          </div>
+          <div class="answer-sec-item">
+            <div class="as-label">총 이자 수익</div>
+            <div class="as-value" id="a1-interest">—</div>
+            <div class="as-sub">복리 효과</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 탭 1: 목표 수익률 계산 (기간 + 월납입금 입력 → 수익률 출력) -->
+    <div id="tab1" style="display:none;">
+      <p class="scenario-title">목표 기간과 월 납입금을 정했을 때</p>
+      <div class="input-grid" style="margin-bottom:1rem;">
+        <div class="field">
+          <label>투자 기간</label>
+          <div class="input-wrap">
+            <input type="number" id="t2-years" value="10" min="1" max="50" step="1" oninput="calcTab2()">
+            <span class="unit">년</span>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="t2-years-s" min="1" max="50" step="1" value="10" oninput="document.getElementById('t2-years').value=this.value;calcTab2()">
+          </div>
+        </div>
+        <div class="field">
+          <label>월 납입금</label>
+          <div class="input-wrap">
+            <input type="number" id="t2-monthly" value="300000" min="0" step="10000" oninput="calcTab2()">
+            <span class="unit">원</span>
+          </div>
+        </div>
+      </div>
+      <div class="answer-box">
+        <div class="answer-primary">
+          <div class="ap-badge">계산 결과</div>
+          <div class="ap-label">필요한 연 수익률</div>
+          <div class="ap-value" id="a2-rate">—</div>
+          <div class="ap-sub" id="a2-sub">계산 중</div>
+        </div>
+        <div class="answer-secondary">
+          <div class="answer-sec-item">
+            <div class="as-label">총 납입 원금</div>
+            <div class="as-value" id="a2-total-p">—</div>
+            <div class="as-sub">원금 합계</div>
+          </div>
+          <div class="answer-sec-item">
+            <div class="as-label">총 이자 수익</div>
+            <div class="as-value" id="a2-interest">—</div>
+            <div class="as-sub">복리 효과</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ 애드센스 중간 슬롯 -->
+  <!--
+  <div style="margin:1.5rem 0;text-align:center;">
+    <ins class="adsbygoogle" style="display:block"
+      data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      data-ad-slot="XXXXXXXXXX"
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+  </div>
+  -->
+  <div class="ad-slot" style="margin:1.5rem 0;">광고 영역 (중간)</div>
+
+  <!-- 복리 계산기 배너 -->
+  <a href="compound.html" class="back-banner">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--accent);text-transform:uppercase;margin-bottom:4px;">관련 계산기</div>
+      <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px;">복리 계산기</div>
+      <div style="font-size:13px;color:var(--muted);">원금, 이율, 기간을 입력해 복리 효과를 시뮬레이션해보세요.</div>
+    </div>
+    <div style="font-size:22px;color:var(--accent);">→</div>
+  </a>
+
+</main>
+
+<footer>
+  <p style="margin-bottom:8px;">
+    <a href="/privacy.html">개인정보처리방침</a>
+    <a href="/terms.html">이용약관</a>
+    <a href="/contact.html">문의</a>
+  </p>
+  <p>© 2025 WhatAGoodLife · 본 계산기는 참고용이며 실제 투자 결과와 다를 수 있습니다.</p>
+</footer>
+
+<script>
+  var currentTab = 0;
+
+  function switchTab(n, btn) {
+    currentTab = n;
+    [0,1,2].forEach(function(i) {
+      document.getElementById('tab'+i).style.display = i===n ? 'block' : 'none';
+    });
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+
+  function fmt(n) {
+    if (n >= 100000000) return (n / 100000000).toFixed(1) + '억원';
+    if (n >= 10000) return Math.round(n / 10000) + '만원';
+    return Math.round(n).toLocaleString('ko-KR') + '원';
+  }
+
+  // 실효 월이율
+  function monthlyRate(r, n) {
+    return Math.pow(1 + r / n, n / 12) - 1;
+  }
+
+  // 복리 FV 계산
+  function fv(P, r, t, m) {
+    var n = 12;
+    var A = P * Math.pow(1 + r / n, n * t);
+    if (m > 0 && r > 0) {
+      var i_m = monthlyRate(r, n);
+      A += m * (Math.pow(1 + i_m, 12 * t) - 1) / i_m;
+    } else if (m > 0) {
+      A += m * 12 * t;
+    }
+    return A;
+  }
+
+  function getInputs() {
+    return {
+      P: parseFloat(document.getElementById('principal').value) || 0,
+      T: parseFloat(document.getElementById('target').value) || 0
+    };
+  }
+
+  function calcAll() {
+    var v = getInputs();
+    var pct = v.T > 0 ? Math.min((v.P / v.T) * 100, 100) : 0;
+    document.getElementById('prog-fill').style.width = pct.toFixed(1) + '%';
+    document.getElementById('prog-pct').textContent = pct.toFixed(1) + '%';
+    document.getElementById('prog-principal').textContent = fmt(v.P);
+    document.getElementById('prog-target').textContent = '목표 ' + fmt(v.T);
+    var need = v.T - v.P;
+    document.getElementById('need-box').textContent =
+      need > 0 ? '목표 자산까지 ' + fmt(need) + ' 이 더 필요합니다.' : '이미 목표 자산을 달성했습니다!';
+    calcTab0(); calcTab1(); calcTab2();
+  }
+
+  /* 탭0: 월 납입금 역산 */
+  function calcTab0() {
+    var v = getInputs();
+    var r = parseFloat(document.getElementById('t0-rate').value) / 100 || 0;
+    var t = parseInt(document.getElementById('t0-years').value) || 1;
+    var n = 12;
+    var FV_target = v.T;
+    var FV_principal = v.P * Math.pow(1 + r / n, n * t);
+    var need = FV_target - FV_principal;
+
+    var monthly;
+    if (r > 0) {
+      var i_m = monthlyRate(r, n);
+      var factor = (Math.pow(1 + i_m, 12 * t) - 1) / i_m;
+      monthly = need / factor;
+    } else {
+      monthly = need / (12 * t);
+    }
+
+    var totalP = v.P + Math.max(monthly, 0) * 12 * t;
+    var interest = FV_target - totalP;
+
+    if (monthly < 0) {
+      document.getElementById('a0-monthly').textContent = '납입 불필요';
+      document.getElementById('a0-sub').textContent = '원금만으로 달성 가능';
+    } else {
+      document.getElementById('a0-monthly').textContent = fmt(monthly) + '/월';
+      document.getElementById('a0-sub').textContent = t + '년 후 목표 달성';
+    }
+    document.getElementById('a0-total-p').textContent = fmt(Math.max(totalP, v.P));
+    document.getElementById('a0-interest').textContent = '+' + fmt(Math.max(interest, 0));
+  }
+
+  /* 탭1: 목표 기간 역산 (이진탐색) */
+  function calcTab1() {
+    var v = getInputs();
+    var r = parseFloat(document.getElementById('t1-rate').value) / 100 || 0;
+    var m = parseFloat(document.getElementById('t1-monthly').value) || 0;
+
+    if (fv(v.P, r, 0, m) >= v.T) {
+      document.getElementById('a1-years').textContent = '즉시 달성';
+      document.getElementById('a1-months').textContent = '0';
+      document.getElementById('a1-interest').textContent = '+0원';
+      document.getElementById('a1-sub').textContent = '원금이 이미 목표 이상';
+      return;
+    }
+
+    // 이진탐색으로 목표 기간 찾기
+    var lo = 0, hi = 100, mid;
+    for (var i = 0; i < 60; i++) {
+      mid = (lo + hi) / 2;
+      if (fv(v.P, r, mid, m) < v.T) lo = mid; else hi = mid;
+    }
+    var years = hi;
+    var months = Math.ceil(years * 12);
+    var actualYears = months / 12;
+
+    var totalP = v.P + m * months;
+    var interest = v.T - totalP;
+
+    var yDisplay = Math.floor(months / 12);
+    var mDisplay = months % 12;
+    var label = yDisplay > 0 ? yDisplay + '년 ' : '';
+    if (mDisplay > 0) label += mDisplay + '개월';
+
+    document.getElementById('a1-years').textContent = label || '—';
+    document.getElementById('a1-months').textContent = months + '개월';
+    document.getElementById('a1-interest').textContent = '+' + fmt(Math.max(interest, 0));
+    document.getElementById('a1-sub').textContent = '월 ' + fmt(m) + ' 납입 기준';
+  }
+
+  /* 탭2: 목표 수익률 역산 (이진탐색) */
+  function calcTab2() {
+    var v = getInputs();
+    var t = parseInt(document.getElementById('t2-years').value) || 1;
+    var m = parseFloat(document.getElementById('t2-monthly').value) || 0;
+
+    // r=0일 때도 목표 달성 불가하면 안내
+    var fv0 = v.P + m * 12 * t;
+    if (fv0 >= v.T) {
+      document.getElementById('a2-rate').textContent = '0%';
+      document.getElementById('a2-sub').textContent = '수익 없이도 달성 가능';
+      document.getElementById('a2-total-p').textContent = fmt(fv0);
+      document.getElementById('a2-interest').textContent = '+0원';
+      return;
+    }
+
+    // 이진탐색: 연 수익률 0~100%
+    var lo = 0, hi = 1.0, mid;
+    for (var i = 0; i < 80; i++) {
+      mid = (lo + hi) / 2;
+      if (fv(v.P, mid, t, m) < v.T) lo = mid; else hi = mid;
+    }
+    var rate = hi;
+    var totalP = v.P + m * 12 * t;
+    var interest = v.T - totalP;
+
+    if (rate > 0.5) {
+      document.getElementById('a2-rate').textContent = (rate * 100).toFixed(1) + '%';
+      document.getElementById('a2-sub').textContent = '⚠ 매우 높은 수익률 필요';
+    } else {
+      document.getElementById('a2-rate').textContent = (rate * 100).toFixed(1) + '%';
+      document.getElementById('a2-sub').textContent = '연 복리 기준';
+    }
+    document.getElementById('a2-total-p').textContent = fmt(totalP);
+    document.getElementById('a2-interest').textContent = '+' + fmt(Math.max(interest, 0));
+  }
+
+  calcAll();
+</script>
+
+</body>
+</html>
