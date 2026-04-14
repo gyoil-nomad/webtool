@@ -71,6 +71,7 @@
     /* ── 요약 카드 4개 ── */
     .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:1.25rem;}
     .summary-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:1.25rem;}
+    .scard.hidden{display:none;}
     .scard{background:var(--bg);border-radius:var(--radius-sm);padding:.875rem 1rem;}
     .scard .s-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;}
     .scard .s-value{font-size:20px;font-weight:700;color:var(--text);}
@@ -110,7 +111,7 @@
     .nav-banner:hover{opacity:.85;}
     footer{border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;font-size:13px;color:var(--muted);}
     footer a{color:var(--muted);text-decoration:none;margin:0 .5rem;}
-    @media(max-width:600px){.card{padding:1.25rem;}nav{display:none;}.detail-grid{grid-template-columns:1fr;}.summary-grid{grid-template-columns:1fr 1fr;}.summary-inner{grid-template-columns:1fr 1fr;}}
+    @media(max-width:600px){.card{padding:1.25rem;}nav{display:none;}.detail-grid{grid-template-columns:1fr;}.summary-grid{grid-template-columns:1fr 1fr;}.summary-inner{grid-template-columns:1fr 1fr;}.scard.hidden{display:none;}}
   </style>
 </head>
 <body>
@@ -157,6 +158,9 @@
           <span class="unit">원</span>
         </div>
         <input type="range" id="salarySlider" min="10000000" max="200000000" step="1000000" value="40000000" oninput="document.getElementById('salary').value=this.value;calc()">
+        <div id="annual-display" style="display:none;margin-top:8px;background:var(--accent-light);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--accent);">
+          세전 연봉 <strong id="annual-display-val">—</strong>
+        </div>
       </div>
       <div class="field">
         <label>월 비과세 (식대 등)</label>
@@ -221,6 +225,10 @@
       <div class="scard green">
         <div class="s-label">실효 세율</div>
         <div class="s-value" id="s-effrate">—</div>
+      </div>
+      <div class="scard hidden" id="card-annual-est" style="border:1px dashed var(--accent);background:var(--accent-light);">
+        <div class="s-label" style="color:var(--accent);">추정 세전연봉</div>
+        <div class="s-value blue" id="s-annual-est">—</div>
       </div>
     </div>
   </div>
@@ -563,6 +571,14 @@ function calc(){
   document.getElementById('s-annual').textContent=fmt(takeHome*12);
   document.getElementById('s-deduct').textContent=fmt(totalDeduct);
   document.getElementById('s-effrate').textContent=effRate.toFixed(1)+'%';
+  // 추정 세전연봉 카드 (월급 모드일 때만 표시)
+  var cardAnnualEst = document.getElementById('card-annual-est');
+  if(currentMode === 'monthly'){
+    cardAnnualEst.classList.remove('hidden');
+    document.getElementById('s-annual-est').textContent=fmt(annual);
+  } else {
+    cardAnnualEst.classList.add('hidden');
+  }
 
   // 비율 막대
   var takePct=monthlyGross>0?(takeHome/monthlyGross*100):70;
