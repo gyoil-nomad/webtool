@@ -53,6 +53,9 @@
     .input-wrap .unit{padding:0 12px 0 4px;font-size:13px;color:var(--muted);white-space:nowrap;flex-shrink:0;}
     .input-wrap select{border:none;background:transparent;padding:10px 12px;font-size:14px;color:var(--text);width:100%;outline:none;cursor:pointer;}
     input[type="range"]{width:100%;height:4px;accent-color:var(--accent);cursor:pointer;margin-top:8px;}
+    .toggle-wrap{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px;gap:3px;margin-bottom:1.25rem;}
+    .toggle-btn{flex:1;padding:8px 0;font-size:13px;font-weight:600;border:none;border-radius:6px;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;}
+    .toggle-btn.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.08);}
 
     /* ── 비율 막대 ── */
     .big-bar-wrap{margin:1.25rem 0 1rem;}
@@ -139,9 +142,16 @@
   <!-- ── 입력 ── -->
   <div class="card">
     <div class="card-title"><div class="icon">✏️</div> 급여 정보 입력</div>
+
+    <!-- 토글 -->
+    <div class="toggle-wrap">
+      <button class="toggle-btn active" id="btn-annual" onclick="setMode('annual')">연봉으로 보기</button>
+      <button class="toggle-btn" id="btn-monthly" onclick="setMode('monthly')">월급으로 보기 (세전)</button>
+    </div>
+
     <div class="input-grid">
       <div class="field">
-        <label>연봉 (세전)</label>
+        <label id="salary-label">연봉 (세전)</label>
         <div class="input-wrap">
           <input type="number" id="salary" value="40000000" min="0" step="1000000" oninput="syncSlider();calc()">
           <span class="unit">원</span>
@@ -264,6 +274,8 @@
         </div>
       </div>
 
+      <!-- 소득세 구간 표 아래 설명은 bracket 섹션 끝에 -->
+
       <!-- 소득세 구간 -->
       <div>
         <div class="detail-title">소득세 구간</div>
@@ -303,6 +315,7 @@
           <div class="bracket-bar-bg"><div class="bracket-bar-fill" id="br5"></div></div>
           <div class="bracket-amount" id="bv5">—</div>
         </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.7;padding-top:10px;border-top:0.5px solid var(--border);">좌측 금액은 연 소득 구간이며, 우측 금액은 각 소득세 구간에서 실제 납부하는 세액입니다.</p>
       </div>
     </div>
   </div>
@@ -435,9 +448,39 @@
 <script>
 var RATES={nps:0.0475,health:0.03595,ltcRatio:0.1314,emp:0.009,npsMax:6370000,npsMin:400000};
 
+var currentMode = 'annual'; // 'annual' | 'monthly'
+
+function setMode(mode){
+  currentMode = mode;
+  var isAnnual = mode === 'annual';
+  document.getElementById('btn-annual').className = 'toggle-btn' + (isAnnual ? ' active' : '');
+  document.getElementById('btn-monthly').className = 'toggle-btn' + (!isAnnual ? ' active' : '');
+  document.getElementById('salary-label').textContent = isAnnual ? '연봉 (세전)' : '월급 (세전)';
+
+  // 슬라이더 범위 조정
+  var slider = document.getElementById('salarySlider');
+  var input = document.getElementById('salary');
+  if(isAnnual){
+    slider.min = 10000000; slider.max = 200000000; slider.step = 1000000;
+    // 월급 → 연봉 변환
+    var cur = parseFloat(input.value)||0;
+    input.value = Math.round(cur * 12 / 1000000) * 1000000;
+    input.step = 1000000;
+  } else {
+    slider.min = 1000000; slider.max = 20000000; slider.step = 100000;
+    // 연봉 → 월급 변환
+    var cur = parseFloat(input.value)||0;
+    input.value = Math.round(cur / 12 / 100000) * 100000;
+    input.step = 100000;
+  }
+  syncSlider();
+  calc();
+}
+
 function syncSlider(){
   var v=parseFloat(document.getElementById('salary').value)||0;
-  document.getElementById('salarySlider').value=Math.min(v,200000000);
+  var slider=document.getElementById('salarySlider');
+  document.getElementById('salarySlider').value=Math.min(v,parseFloat(slider.max));
 }
 
 function calcIncomeTax(monthlyTaxable,familyCount,childCount){
@@ -491,7 +534,8 @@ function fmt(n){
 function fmtW(n){return Math.round(Math.abs(n)).toLocaleString('ko-KR')+'원';}
 
 function calc(){
-  var annual=parseFloat(document.getElementById('salary').value)||0;
+  var inputVal=parseFloat(document.getElementById('salary').value)||0;
+  var annual = (currentMode === 'monthly') ? inputVal * 12 : inputVal;
   var nontaxMonth=parseFloat(document.getElementById('nontax').value)||0;
   var family=parseInt(document.getElementById('family').value)||1;
   var children=parseInt(document.getElementById('children').value)||0;
