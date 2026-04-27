@@ -166,6 +166,13 @@
 
   <button class="btn" onclick="analyze()"><span>🔍</span> 최적 배분 전략 분석하기</button>
 
+
+  <!-- 쿠팡 파트너스 배너 -->
+  <div id="coupangBanner" style="background:#fff;border:1px solid #e4e2db;border-radius:14px;padding:1.25rem;margin-top:1.5rem;text-align:center;overflow:hidden;display:none;">
+    <div style="font-size:11px;color:#a09880;margin-bottom:10px;letter-spacing:.04em;text-transform:uppercase;">파트너 광고</div>
+    <div id="coupangSlot"></div>
+  </div>
+
   <div id="errArea"></div>
   <div id="resultArea" style="margin-top:1.5rem;"></div>
 </main>
@@ -344,20 +351,8 @@ function renderResult(r){
       </div>
     </div>
 
-<div style="margin:1.5rem 0;text-align:center;overflow:hidden;">
-  <script>
-    (function() {
-      var s = document.createElement('script');
-      s.src = 'https://ads-partners.coupang.com/g.js';
-      s.onload = function() {
-        new PartnersCoupang.G({"id":980770,"template":"carousel","trackingCode":"AF1889726","width":"680","height":"140","tsource":""});
-      };
-      document.head.appendChild(s);
-    })();
-  </script>
-</div>
-
-    <!-- 관련 아티클 -->
+    
+  <!-- 관련 아티클 -->
     <div class="card">
       <div class="card-title"><div class="card-icon" style="background:var(--accent-light);">📰</div>함께 읽으면 좋은 절세 가이드</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
@@ -425,6 +420,19 @@ function renderResult(r){
   const area=document.getElementById('resultArea');
   area.innerHTML=html;
   area.scrollIntoView({behavior:'smooth',block:'start'});
+
+  // 쿠팡 배너 표시
+  var banner = document.getElementById('coupangBanner');
+  var slot = document.getElementById('coupangSlot');
+  if (banner && slot && slot.children.length === 0) {
+    banner.style.display = 'block';
+    var s = document.createElement('script');
+    s.src = 'https://ads-partners.coupang.com/g.js';
+    s.onload = function() {
+      new PartnersCoupang.G({"id":980770,"template":"carousel","trackingCode":"AF1889726","width":"680","height":"140","tsource":""});
+    };
+    slot.appendChild(s);
+  }
 }
 </script>
 </body>
